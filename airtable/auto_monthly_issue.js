@@ -1,3 +1,8 @@
+/**
+ * Airtable > Skylinks at Buchanan Fields base > automations > Issue Tracker table
+ */
+
+
 const TABLE_NAME = "Issue Tracker";               // your table
 const VIEW_NAME  = "Handyman";                    // adjust to match your schema
 const DESC_FLD   = "Description";                 // adjust if needed
