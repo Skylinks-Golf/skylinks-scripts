@@ -1,0 +1,24 @@
+{
+  "name": "member_data_export",
+  "version": "0.1.0",
+  "description": "SQLite member data store and utilities for CardImaging integration.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "init-db": "node src/initDb.js",
+    "demo": "node src/index.js",
+    "migrate-airtable": "node src/migrateAirtable.js"
+  },
+  "keywords": [
+    "sqlite",
+    "cardimaging",
+    "members"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "airtable": "^0.12.2",
+    "dotenv": "^16.4.5",
+    "sqlite3": "^5.1.7"
+  }
+}
