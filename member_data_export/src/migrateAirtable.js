@@ -1,7 +1,7 @@
 import AirtablePkg from "airtable";
 import { config } from "./config.js";
 import { initializeDatabase } from "./db.js";
-import { insertMember } from "./members.js";
+import { upsertMember } from "./members.js";
 
 const Airtable = AirtablePkg.default ?? AirtablePkg;
 
@@ -23,6 +23,26 @@ async function fetchPhotoBlob(url) {
   return Buffer.from(buffer);
 }
 
+function normalizeTextField(value) {
+  if (value === undefined || value === null) return "";
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => normalizeTextField(item))
+      .filter((v) => v !== "")
+      .join(", ");
+  }
+
+  if (typeof value === "object") {
+    if (value.name) return value.name.toString();
+    if (value.email) return value.email.toString();
+    if (value.id) return value.id.toString();
+    return JSON.stringify(value);
+  }
+
+  return value.toString();
+}
+
 async function migrateFromAirtable() {
   ensureAirtableConfig();
   await initializeDatabase();
@@ -32,6 +52,22 @@ async function migrateFromAirtable() {
   const records = await base(tableName).select().all();
 
   for (const record of records) {
+    const memberNumber = normalizeTextField(record.get("Member Number"));
+    if (!memberNumber) {
+      console.warn(`Skipping record ${record.id} - missing Member Number`);
+      continue;
+    }
+
+    const firstName = normalizeTextField(record.get("First Name"));
+    const email = normalizeTextField(record.get("Email"));
+
+    if (!firstName || !email) {
+      console.warn(
+        `Skipping ${memberNumber || record.id} - missing first name or email`
+      );
+      continue;
+    }
+
     const photoUrl = record.get("Photo")?.[0]?.url;
     let photoBlob = null;
 
@@ -46,18 +82,18 @@ async function migrateFromAirtable() {
     }
 
     try {
-      await insertMember({
-        member_number: record.get("Member Number"),
-        first_name: record.get("First Name"),
-        email: record.get("Email"),
+      await upsertMember({
+        member_number: memberNumber,
+        first_name: firstName,
+        email,
         photo: photoBlob,
       });
       console.log(
-        `Inserted member ${record.get("Member Number") || record.id}`
+        `Inserted member ${memberNumber || record.id}`
       );
     } catch (err) {
       console.error(
-        `Failed to insert member ${record.get("Member Number") || record.id}:`,
+        `Failed to insert member ${memberNumber || record.id}:`,
         err.message
       );
     }

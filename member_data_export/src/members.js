@@ -64,6 +64,25 @@ export async function insertMember(memberData) {
   );
 }
 
+export async function upsertMember(memberData) {
+  const { member_number, first_name, email, photo = null } = memberData;
+  requireValue(member_number, "member_number");
+  requireValue(first_name, "first_name");
+  requireValue(email, "email");
+
+  const sql = `INSERT INTO members (member_number, first_name, email, photo)
+               VALUES (?, ?, ?, ?)
+               ON CONFLICT(member_number) DO UPDATE SET
+                 first_name = excluded.first_name,
+                 email = excluded.email,
+                 photo = excluded.photo,
+                 updated_at = CURRENT_TIMESTAMP`;
+
+  return withDatabase((db) =>
+    runStatement(db, sql, [member_number, first_name, email, photo])
+  );
+}
+
 export async function getMemberByNumber(memberNumber) {
   const sql = "SELECT * FROM members WHERE member_number = ?";
   return withDatabase((db) => runGet(db, sql, [memberNumber]));
