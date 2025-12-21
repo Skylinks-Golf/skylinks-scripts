@@ -5,6 +5,7 @@ const updatableFields = new Set([
   "member_number",
   "first_name",
   "email",
+  "tier",
   "photo",
 ]);
 
@@ -51,35 +52,38 @@ function runStatement(db, sql, params = []) {
 }
 
 export async function insertMember(memberData) {
-  const { member_number, first_name, email, photo = null } = memberData;
+  const { member_number, first_name, email, tier, photo = null } = memberData;
   requireValue(member_number, "member_number");
   requireValue(first_name, "first_name");
   requireValue(email, "email");
+  requireValue(tier, "tier");
 
-  const sql = `INSERT INTO members (member_number, first_name, email, photo)
-               VALUES (?, ?, ?, ?)`;
+  const sql = `INSERT INTO members (member_number, first_name, email, tier, photo)
+               VALUES (?, ?, ?, ?, ?)`;
 
   return withDatabase((db) =>
-    runStatement(db, sql, [member_number, first_name, email, photo])
+    runStatement(db, sql, [member_number, first_name, email, tier, photo])
   );
 }
 
 export async function upsertMember(memberData) {
-  const { member_number, first_name, email, photo = null } = memberData;
+  const { member_number, first_name, email, tier, photo = null } = memberData;
   requireValue(member_number, "member_number");
   requireValue(first_name, "first_name");
   requireValue(email, "email");
+  requireValue(tier, "tier");
 
-  const sql = `INSERT INTO members (member_number, first_name, email, photo)
-               VALUES (?, ?, ?, ?)
+  const sql = `INSERT INTO members (member_number, first_name, email, tier, photo)
+               VALUES (?, ?, ?, ?, ?)
                ON CONFLICT(member_number) DO UPDATE SET
                  first_name = excluded.first_name,
                  email = excluded.email,
+                 tier = excluded.tier,
                  photo = excluded.photo,
                  updated_at = CURRENT_TIMESTAMP`;
 
   return withDatabase((db) =>
-    runStatement(db, sql, [member_number, first_name, email, photo])
+    runStatement(db, sql, [member_number, first_name, email, tier, photo])
   );
 }
 

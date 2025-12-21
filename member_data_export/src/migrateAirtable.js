@@ -37,6 +37,7 @@ function normalizeTextField(value) {
     if (value.name) return value.name.toString();
     if (value.email) return value.email.toString();
     if (value.id) return value.id.toString();
+    if (value.tier) return value.tier.toString();
     return JSON.stringify(value);
   }
 
@@ -60,6 +61,7 @@ async function migrateFromAirtable() {
 
     const firstName = normalizeTextField(record.get("First Name"));
     const email = normalizeTextField(record.get("Email"));
+    const tier = normalizeTextField(record.get("Membership Tier"));
 
     if (!firstName || !email) {
       console.warn(
@@ -86,6 +88,7 @@ async function migrateFromAirtable() {
         member_number: memberNumber,
         first_name: firstName,
         email,
+        tier,
         photo: photoBlob,
       });
       console.log(

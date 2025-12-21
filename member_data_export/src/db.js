@@ -33,6 +33,7 @@ export async function initializeDatabase() {
         member_number TEXT UNIQUE NOT NULL,
         first_name TEXT NOT NULL,
         email TEXT NOT NULL,
+        tier TEXT NOT NULL,
         photo BLOB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

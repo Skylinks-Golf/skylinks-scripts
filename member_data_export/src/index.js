@@ -15,6 +15,7 @@ async function seedSampleMember() {
       member_number: "M001",
       first_name: "Sample",
       email: "sample@example.com",
+      tier: "Base",
       photo: photoBlob,
     });
     console.log("Inserted sample member M001.");
