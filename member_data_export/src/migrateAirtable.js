@@ -1,7 +1,7 @@
 import AirtablePkg from "airtable";
 import { config } from "./config.js";
 import { initializeDatabase } from "./db.js";
-import { upsertMember } from "./members.js";
+import { deleteMembersNotInList, upsertMember } from "./members.js";
 
 const Airtable = AirtablePkg.default ?? AirtablePkg;
 
@@ -48,9 +48,11 @@ async function migrateFromAirtable() {
   ensureAirtableConfig();
   await initializeDatabase();
 
-  const { apiKey, baseId, tableName } = config.airtable;
+  const { apiKey, baseId, tableName, viewName } = config.airtable;
   const base = new Airtable({ apiKey }).base(baseId);
-  const records = await base(tableName).select().all();
+  const selectOptions = viewName ? { view: viewName } : undefined;
+  const records = await base(tableName).select(selectOptions).all();
+  const memberNumbers = [];
 
   for (const record of records) {
     const memberNumber = normalizeTextField(record.get("Member Number"));
@@ -58,6 +60,7 @@ async function migrateFromAirtable() {
       console.warn(`Skipping record ${record.id} - missing Member Number`);
       continue;
     }
+    memberNumbers.push(memberNumber);
 
     const firstName = normalizeTextField(record.get("First Name"));
     const email = normalizeTextField(record.get("Email"));
@@ -100,6 +103,13 @@ async function migrateFromAirtable() {
         err.message
       );
     }
+  }
+
+  try {
+    const result = await deleteMembersNotInList(memberNumbers);
+    console.log(`Removed ${result.changes} stale members`);
+  } catch (err) {
+    console.error("Failed to remove stale members:", err.message);
   }
 }
 

@@ -11,6 +11,7 @@ export const config = {
     apiKey: process.env.AIRTABLE_API_KEY || "",
     baseId: process.env.AIRTABLE_BASE_ID || "",
     tableName: process.env.AIRTABLE_TABLE_NAME || "Members",
+    viewName: process.env.AIRTABLE_VIEW_NAME || "",
   },
 };
 

@@ -134,3 +134,18 @@ export async function exportPhoto(memberNumber, outputPath) {
     return exportPhotoBlob(row.photo, outputPath);
   });
 }
+
+export async function deleteMembersNotInList(memberNumbers) {
+  if (!Array.isArray(memberNumbers)) {
+    throw new Error("memberNumbers must be an array.");
+  }
+
+  if (memberNumbers.length === 0) {
+    return withDatabase((db) => runStatement(db, "DELETE FROM members"));
+  }
+
+  const placeholders = memberNumbers.map(() => "?").join(", ");
+  const sql = `DELETE FROM members WHERE member_number NOT IN (${placeholders})`;
+
+  return withDatabase((db) => runStatement(db, sql, memberNumbers));
+}
