@@ -7,7 +7,8 @@
   "scripts": {
     "init-db": "node src/initDb.js",
     "demo": "node src/index.js",
-    "migrate-airtable": "node src/migrateAirtable.js"
+    "migrate-airtable": "node src/migrateAirtable.js",
+    "migrate-last-year-photos": "node src/memberOldPhoto.js"
   },
   "keywords": [
     "sqlite",
