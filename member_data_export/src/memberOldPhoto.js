@@ -11,6 +11,7 @@ const MEMBER_NUMBER_FIELD = "Member Number";
 const FIRST_NAME_FIELD = "First Name";
 const EMAIL_FIELD = "Email";
 const TIER_FIELD = "Membership Tier";
+const CARD_PRINTED_FIELD = "Card Printed";
 
 function ensureAirtableConfig() {
   const { apiKey, baseId } = config.airtable;
@@ -124,7 +125,7 @@ async function migrateLastYearPhotos() {
     const lastYearViewName = config.lastYearAirtable.viewName || viewName;
     const base = new Airtable({ apiKey }).base(baseId);
     const selectOptions = {
-      filterByFormula: `{${LAST_YEAR_FLAG_FIELD}}`,
+      filterByFormula: `AND({${LAST_YEAR_FLAG_FIELD}}, NOT({${CARD_PRINTED_FIELD}}))`,
     };
     if (lastYearViewName) {
       selectOptions.view = lastYearViewName;
