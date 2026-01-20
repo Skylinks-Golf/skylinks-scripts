@@ -10,6 +10,7 @@ const OLD_PHOTO_FIELD = "Old Photo";
 const MEMBER_NUMBER_FIELD = "Member Number";
 const FIRST_NAME_FIELD = "First Name";
 const EMAIL_FIELD = "Email";
+const TIER_FIELD = "Membership Tier";
 
 function ensureAirtableConfig() {
   const { apiKey, baseId } = config.airtable;
@@ -45,6 +46,7 @@ async function initializeLastYearDatabase(db) {
       member_number TEXT UNIQUE NOT NULL,
       first_name TEXT NOT NULL,
       email TEXT NOT NULL,
+      tier TEXT NOT NULL,
       photo BLOB,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -61,17 +63,24 @@ async function initializeLastYearDatabase(db) {
 }
 
 async function upsertLastYearMember(db, memberData) {
-  const { member_number, first_name, email, photo } = memberData;
+  const { member_number, first_name, email, tier, photo } = memberData;
 
-  const sql = `INSERT INTO members (member_number, first_name, email, photo)
-               VALUES (?, ?, ?, ?)
+  const sql = `INSERT INTO members (member_number, first_name, email, tier, photo)
+               VALUES (?, ?, ?, ?, ?)
                ON CONFLICT(member_number) DO UPDATE SET
                  first_name = excluded.first_name,
                  email = excluded.email,
+                 tier = excluded.tier,
                  photo = excluded.photo,
                  updated_at = CURRENT_TIMESTAMP`;
 
-  return runStatement(db, sql, [member_number, first_name, email, photo]);
+  return runStatement(db, sql, [
+    member_number,
+    first_name,
+    email,
+    tier,
+    photo,
+  ]);
 }
 
 async function fetchPhotoBlob(url) {
@@ -131,10 +140,11 @@ async function migrateLastYearPhotos() {
       );
       const firstName = normalizeTextField(record.get(FIRST_NAME_FIELD));
       const email = normalizeTextField(record.get(EMAIL_FIELD));
+      const tier = normalizeTextField(record.get(TIER_FIELD));
 
-      if (!memberNumber || !firstName || !email) {
+      if (!memberNumber || !firstName || !email || !tier) {
         console.warn(
-          `Skipping record ${record.id} - missing member number, first name, or email`
+          `Skipping record ${record.id} - missing member number, first name, email, or tier`
         );
         continue;
       }
@@ -159,6 +169,7 @@ async function migrateLastYearPhotos() {
         member_number: memberNumber,
         first_name: firstName,
         email,
+        tier,
         photo: photoBlob,
       });
 
