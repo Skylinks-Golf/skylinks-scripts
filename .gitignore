@@ -1,3 +1,4 @@
 node_modules
+member_data_export/node_modules
 .env
 members.db
