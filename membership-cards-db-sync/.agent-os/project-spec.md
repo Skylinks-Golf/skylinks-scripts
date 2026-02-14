@@ -98,18 +98,24 @@ NFR-5. Reliability: transient HTTP errors downloading photos should be retried a
 - `AIRTABLE_TABLE_NAME` (default: `2026 Members - Lightspeed Tracking`)
 - `AIRTABLE_VIEW_NAME` (default: `Awaiting Membership Card`)
 
-**Field mapping (to be confirmed in implementation)**
+**Field mapping (confirmed from CSV export on 2026-02-14)**
 
 - `Member Number` → `member_number`
 - `First Name` → `first_name`
 - `Email` → `email`
 - `Photo` (attachment) → `photo_blob`
 
+**Additional observed fields (policy-dependent usage)**
+
+- `Old Photo` (attachment-like export string)
+- `Use Last Year Photo` (`checked` or blank)
+
 ### SQLite (CardImaging consumption)
 
 **Database file**
 
 - `DATABASE_PATH` (default: `./members.db`)
+- Windows production path (confirmed 2026-02-14): `C:\data\skylinks\membersdb\members.db`
 
 **Table**: `members`
 
@@ -143,6 +149,8 @@ Recommended for debuggability (optional):
     - skip record; log as “skipped (missing field)”
 - Photo attachment missing or download fails:
     - skip record; log error; continue
+- `Photo` empty and `Old Photo` present:
+    - fallback to `Old Photo` even if `Use Last Year Photo` is not checked
 - Airtable API rate limit / transient failure:
     - retry/backoff; fail run with clear message if unrecoverable
 
@@ -151,16 +159,19 @@ Recommended for debuggability (optional):
 - Scheduled sync / background service.
 - Multi-machine coordination (each workstation runs locally).
 - Auto-updating Airtable based on print completion.
+- “Last year photo reuse” as a separate feature toggle/workflow (deferred beyond current implementation).
 
 ## 9) Open Questions
 
-- What are the exact Airtable field names for the photo attachment and member number in the current base? (Confirm and lock.)
-- Where does CardImaging expect `members.db` to live on the workstation (absolute path)?
-- Should the script support “last year photo reuse” in v1, or defer?
+- None at this time.
 
 ## 10) Change Log
 
 - 2026-02-14: Initial project spec created from SWS feature documentation.
+- 2026-02-14: Field names confirmed from `artifacts/airtable_schema.csv`; added `Old Photo` and `Use Last Year Photo` as observed fields and refined open questions.
+- 2026-02-14: CardImaging DB path confirmed for Windows runtime: `C:\data\skylinks\membersdb\members.db`.
+- 2026-02-14: Fallback policy confirmed: if `Photo` is empty and `Old Photo` exists, use `Old Photo` regardless of `Use Last Year Photo`.
+- 2026-02-14: “Last year photo reuse” broader feature explicitly deferred to a future iteration.
 
 ---
 
