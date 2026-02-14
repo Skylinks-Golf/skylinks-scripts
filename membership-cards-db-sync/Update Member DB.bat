@@ -1,0 +1,16 @@
+@echo off
+setlocal
+
+cd /d "%~dp0"
+
+where py >nul 2>nul
+if %errorlevel%==0 (
+  py -3 run_sync.py
+) else (
+  python run_sync.py
+)
+
+echo.
+echo Sync finished with exit code %errorlevel%.
+pause
+

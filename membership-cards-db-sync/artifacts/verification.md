@@ -41,26 +41,26 @@ Validate that the Airtable to SQLite sync behaves correctly and safely for ProSh
 
 | ID | Date | Executor | Environment | Result | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| V-01 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-02 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-03 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-04 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-05 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-06 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-07 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-08 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-09 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-10 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-11 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-12 | TBD | TBD | Repo and runtime config | Pending | TBD |
-| V-13 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-14 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-15 | TBD | TBD | Local Windows workstation | Pending | TBD |
-| V-16 | TBD | TBD | Local Windows workstation | Pending | TBD |
+| V-01 | 2026-02-14 | PM/Engineering Agent | Sandbox live run (`/tmp/members_live2.db`) | Passed | Airtable fetch succeeded (`fetched=58`) using configured table/view |
+| V-02 | TBD | TBD | Local Windows workstation | Pending | Requires >1 Airtable API page dataset during execution |
+| V-03 | TBD | TBD | Local Windows workstation | Pending | Pending targeted fixture validation for required-field extraction |
+| V-04 | 2026-02-14 | PM/Engineering Agent | Sandbox live run (`/tmp/members_live2.db`) | Passed | Skip behavior observed for rows missing both `Photo` and `Old Photo` |
+| V-05 | 2026-02-14 | PM/Engineering Agent | Sandbox live run (`/tmp/members_live2.db`) | Passed | `prepared=16`, `download_errors=0` indicates successful photo download for synced set |
+| V-06 | 2026-02-14 | PM/Engineering Agent | Sandbox live rerun (`/tmp/members_live2.db`) | Passed | Second run summary: `inserted=0`, `updated=16`, `deleted=0` (idempotent behavior) |
+| V-07 | TBD | TBD | Local Windows workstation | Pending | Pending controlled source removal and prune verification |
+| V-08 | TBD | TBD | Local Windows workstation | Pending | Pending empty-view test without `--confirm-empty` |
+| V-09 | TBD | TBD | Local Windows workstation | Pending | Pending empty-view test with `--confirm-empty` |
+| V-10 | TBD | TBD | Windows workstation (double-click) | Pending | Launcher file exists; runtime test pending on Windows host |
+| V-11 | 2026-02-14 | PM/Engineering Agent | Sandbox live run (`/tmp/members_live2.db`) | Passed | Structured summary emitted with fetched/inserted/updated/skipped/deleted/download_errors/fallback counts |
+| V-12 | TBD | TBD | Repo and runtime config | Pending | Pending explicit secret-scan and release review |
+| V-13 | TBD | TBD | Local Windows workstation | Pending | Pending forced transient-failure retry test |
+| V-14 | 2026-02-14 | PM/Engineering Agent | Live + CSV-compatible parser path | Passed | Attachment parsing supports dict/list/direct URL/`filename (url)` string formats |
+| V-15 | 2026-02-14 | PM/Engineering Agent | Sandbox live run (`/tmp/members_live2.db`) | Passed | Old-photo fallback events observed (`old_photo_fallback=9`) |
+| V-16 | 2026-02-14 | PM/Engineering Agent | Sandbox live run (`/tmp/members_live2.db`) | Passed | Fallback applied regardless checkbox state per approved policy and observed runtime behavior |
 
 ## Known Issues
 
-- None verified yet (tests not yet executed).
+- Partial verification completed; see evidence table for passed scenarios.
 - Remaining blockers before execution:
   - None.
 
@@ -77,3 +77,7 @@ Validate that the Airtable to SQLite sync behaves correctly and safely for ProSh
 - [ ] No secrets committed; configuration instructions documented.
 - [ ] Verification evidence table updated with actual artifacts (logs/screenshots/query outputs).
 - [ ] Rollback procedure documented for failed sync deployments.
+
+Execution notes (2026-02-14):
+- Live Airtable validation was run against a temporary sandbox DB path (`/tmp/members_live2.db`) to avoid writing to production Windows path during development verification.
+- Windows production launcher validation (`V-10`) still needs on-device execution.

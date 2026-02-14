@@ -96,4 +96,6 @@ Next 3 executable actions:
 
 Execution status (2026-02-14):
 - Action 1 completed: Python scaffold created with CLI entrypoint, env-based config loading, and Windows DB path normalization to `C:\data\skylinks\membersdb\members.db`.
-- Next in queue: Action 2 implementation (Airtable fetch, field extraction, photo selection, structured logging).
+- Action 2 completed: Airtable pagination fetch, required-field extraction, `Photo`->`Old Photo` fallback selection, and structured skip/fallback summary logging implemented.
+- Action 3 completed (implementation): SQLite idempotent upsert + guarded prune, photo download retries, and Windows launcher `Update Member DB.bat` added.
+- Validation completed: live Airtable sync succeeded using `.env` credentials; second run confirmed idempotent updates (`inserted=0`, `updated=16`) in sandbox verification DB.
