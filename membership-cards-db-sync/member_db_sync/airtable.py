@@ -29,6 +29,7 @@ class MemberCandidate:
     email: str
     membership_tier: str
     photo_url: str
+    old_photo_url: str
     used_old_photo_fallback: bool
 
 
@@ -89,6 +90,7 @@ def build_member_candidate(record: dict[str, Any]) -> tuple[MemberCandidate | No
         email=email,
         membership_tier=membership_tier,
         photo_url=photo_url,
+        old_photo_url=old_photo_url or "",
         used_old_photo_fallback=used_old_photo_fallback,
     )
     return candidate, None

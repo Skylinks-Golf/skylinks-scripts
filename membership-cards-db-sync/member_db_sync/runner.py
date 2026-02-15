@@ -35,6 +35,7 @@ def run_sync(config: AppConfig, confirm_empty: bool) -> int:
 
     prepared_count = 0
     fallback_to_old_photo_count = 0
+    old_photo_download_rescue_count = 0
     skipped_count = 0
     download_error_count = 0
     rows_to_sync: list[dict[str, object]] = []
@@ -72,16 +73,50 @@ def run_sync(config: AppConfig, confirm_empty: bool) -> int:
         try:
             photo_blob = _download_photo_with_retry(candidate.photo_url)
         except Exception as exc:
-            download_error_count += 1
-            skipped_count += 1
-            logging.error(
-                "photo_download_failed record_id=%s member_number=%s email=%s error=%s",
+            can_try_old_photo = bool(
+                candidate.old_photo_url and candidate.old_photo_url != candidate.photo_url
+            )
+            if not can_try_old_photo:
+                download_error_count += 1
+                skipped_count += 1
+                logging.error(
+                    "photo_download_failed record_id=%s member_number=%s email=%s error=%s",
+                    candidate.airtable_record_id,
+                    candidate.member_number,
+                    candidate.email,
+                    exc,
+                )
+                continue
+
+            logging.warning(
+                "primary_photo_download_failed_trying_old_photo record_id=%s member_number=%s email=%s error=%s",
                 candidate.airtable_record_id,
                 candidate.member_number,
                 candidate.email,
                 exc,
             )
-            continue
+            try:
+                photo_blob = _download_photo_with_retry(candidate.old_photo_url)
+                old_photo_download_rescue_count += 1
+                fallback_to_old_photo_count += 1
+                logging.info(
+                    "old_photo_download_rescue_applied record_id=%s member_number=%s email=%s",
+                    candidate.airtable_record_id,
+                    candidate.member_number,
+                    candidate.email,
+                )
+            except Exception as rescue_exc:
+                download_error_count += 1
+                skipped_count += 1
+                logging.error(
+                    "photo_download_failed_after_old_photo_retry record_id=%s member_number=%s email=%s primary_error=%s old_photo_error=%s",
+                    candidate.airtable_record_id,
+                    candidate.member_number,
+                    candidate.email,
+                    exc,
+                    rescue_exc,
+                )
+                continue
 
         rows_to_sync.append(
             {
@@ -117,7 +152,7 @@ def run_sync(config: AppConfig, confirm_empty: bool) -> int:
         return 4
 
     logging.info(
-        "sync_summary fetched=%d prepared=%d inserted=%d updated=%d skipped=%d deleted=%d download_errors=%d old_photo_fallback=%d",
+        "sync_summary fetched=%d prepared=%d inserted=%d updated=%d skipped=%d deleted=%d download_errors=%d old_photo_fallback=%d old_photo_download_rescue=%d",
         fetched_count,
         prepared_count,
         sync_result.inserted,
@@ -126,6 +161,7 @@ def run_sync(config: AppConfig, confirm_empty: bool) -> int:
         sync_result.deleted,
         download_error_count,
         fallback_to_old_photo_count,
+        old_photo_download_rescue_count,
     )
     return 0
 
