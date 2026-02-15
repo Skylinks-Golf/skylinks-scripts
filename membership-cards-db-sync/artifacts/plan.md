@@ -15,6 +15,13 @@ Initialize the Member Card Print Queue Sync project to a ready-to-build state wi
 2. Data and runtime contracts are confirmed.
 3. Execution readiness is established (tasks, verification, risk controls).
 
+## Milestone Status (Save-up 2026-02-15)
+
+1. Initialization artifacts are completed and aligned. `Status: Completed`
+2. Data and runtime contracts are confirmed. `Status: Completed`
+3. Execution readiness is established (tasks, verification, risk controls). `Status: In progress`
+Remaining verification items: V-08, V-09, V-10, V-12, V-13.
+
 ## Work Breakdown
 
 1. Confirm scope and acceptance criteria
@@ -66,6 +73,7 @@ Initialize the Member Card Print Queue Sync project to a ready-to-build state wi
 ## Dependencies
 
 - Local runtime prerequisites (Python and dependencies) identified by engineering owner.
+- Windows workstation validation run for launcher and production path behavior.
 
 ## Rollback Plan
 
@@ -129,4 +137,4 @@ Planned adjustment steps:
 
 Risk notes:
 - Medium risk: schema evolution on existing workstation DB files.
-- Rollback: retain prior script version and DB backup before first tier-enabled production run.
+- Rollback: retain prior script version and DB backup before first tier-enabled production run; if needed, restore prior script and re-run sync to repopulate queue without `membership_tier`.

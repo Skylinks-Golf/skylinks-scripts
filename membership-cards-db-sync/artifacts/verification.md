@@ -69,6 +69,9 @@ Validate that the Airtable to SQLite sync behaves correctly and safely for ProSh
 - Partial verification completed; see evidence table for passed scenarios.
 - Remaining blockers before execution:
   - None.
+- Observed in manual Windows run: one member with both `Photo` and `Old Photo` had primary photo download failure.
+  - Mitigation implemented: automatic retry against `Old Photo` when primary download fails.
+  - Follow-up verification pending on Windows production path run.
 
 ## Release Checklist
 
@@ -88,3 +91,4 @@ Validate that the Airtable to SQLite sync behaves correctly and safely for ProSh
 Execution notes (2026-02-14):
 - Live Airtable validation was run against a temporary sandbox DB path (`/tmp/members_live2.db`) to avoid writing to production Windows path during development verification.
 - Windows production launcher validation (`V-10`) still needs on-device execution.
+- Save-up update (2026-02-15): photo-download rescue fallback (`Photo` -> `Old Photo` on primary failure) implemented after operator-reported edge case.

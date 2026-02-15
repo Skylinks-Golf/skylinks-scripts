@@ -37,6 +37,14 @@ CSV review completed on 2026-02-14 using `artifacts/airtable_schema.csv` (58 row
 4. Risk level and approval posture are documented per Skylinks standards.
 5. Implementation kickoff can begin without ambiguity on first actions.
 
+## Acceptance Criteria Status (Save-up 2026-02-15)
+
+- AC-1: Completed
+- AC-2: Completed
+- AC-3: Completed (open questions resolved or formally deferred)
+- AC-4: Completed
+- AC-5: Completed (implementation actions executed through tier adjustment)
+
 ## Constraints
 
 - Must follow Skylinks PM guardrails:
@@ -84,3 +92,5 @@ CSV review completed on 2026-02-14 using `artifacts/airtable_schema.csv` (58 row
 | 2026-02-14 | PM Agent | Fallback policy confirmed: if `Photo` is empty and `Old Photo` exists, use `Old Photo` regardless of `Use Last Year Photo` value. | Decided | User-provided policy closes fallback ambiguity and unblocks implementation. |
 | 2026-02-14 | PM Agent | “Last year photo reuse” broader feature deferred beyond current implementation scope. | Decided | Keeps v1 focused on deterministic queue sync behavior. |
 | 2026-02-14 | PM Agent | Scope adjustment approved: include Airtable `Membership Tier` in extraction and SQLite sync. | Decided | Updated CSV confirms field availability across all rows and operational need. |
+| 2026-02-14 | Engineering Agent | SQLite sync now auto-creates the DB directory before connect. | Decided | Resolved runtime error `unable to open database file` on Windows systems where target path did not yet exist. |
+| 2026-02-14 | Engineering Agent | Photo download now falls back to `Old Photo` if primary `Photo` download fails and old photo URL exists. | Decided | Addresses real-world case where both photo fields exist but primary URL is broken/expired. |
