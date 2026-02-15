@@ -99,3 +99,34 @@ Execution status (2026-02-14):
 - Action 2 completed: Airtable pagination fetch, required-field extraction, `Photo`->`Old Photo` fallback selection, and structured skip/fallback summary logging implemented.
 - Action 3 completed (implementation): SQLite idempotent upsert + guarded prune, photo download retries, and Windows launcher `Update Member DB.bat` added.
 - Validation completed: live Airtable sync succeeded using `.env` credentials; second run confirmed idempotent updates (`inserted=0`, `updated=16`) in sandbox verification DB.
+- Membership Tier adjustment completed: extraction + SQLite schema/upsert + migration-safe add-column path implemented and validated (`V-17`, `V-18`, `V-19`).
+
+## Change Plan — Membership Tier
+
+Objective:
+- Extend sync contracts and storage to include Airtable `Membership Tier`.
+
+Planned adjustment steps:
+1. Data contract + parser update
+- Owner: Engineering Owner
+- Add `Membership Tier` extraction as a required field and include it in candidate payload.
+- Acceptance: records with missing membership tier are skipped with explicit reason logging.
+
+2. SQLite schema + upsert update
+- Owner: Engineering Owner
+- Add `membership_tier` column to `members` table and include it in upsert updates.
+- Acceptance: new inserts and reruns persist/update `membership_tier` without breaking existing rows.
+
+3. Migration/backward compatibility
+- Owner: Engineering Owner
+- Ensure existing databases are upgraded safely (e.g., add-column path) before writes.
+- Acceptance: no runtime failure when running against pre-change DB files.
+
+4. Verification update + execution
+- Owner: PM Agent + Engineering Owner
+- Add and run membership-tier test cases in `artifacts/verification.md`.
+- Acceptance: extraction, persistence, and idempotent-update behavior for tier field are evidenced.
+
+Risk notes:
+- Medium risk: schema evolution on existing workstation DB files.
+- Rollback: retain prior script version and DB backup before first tier-enabled production run.

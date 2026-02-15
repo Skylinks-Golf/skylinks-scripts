@@ -16,6 +16,7 @@ The script queries Airtable for members who are currently **awaiting their membe
     - `member_number`
     - `first_name`
     - `email`
+    - `membership_tier`
     - `photo` (BLOB)
 - Ensure the sync is safe to run repeatedly:
     - idempotent upsert
@@ -53,6 +54,7 @@ FR-3. For each Airtable record, the program must extract the required fields:
 - Member Number
 - First Name
 - Email
+- Membership Tier
 - Photo attachment
 
 FR-4. The program must download the photo attachment and store it in SQLite as a BLOB.
@@ -103,6 +105,7 @@ NFR-5. Reliability: transient HTTP errors downloading photos should be retried a
 - `Member Number` → `member_number`
 - `First Name` → `first_name`
 - `Email` → `email`
+- `Membership Tier` → `membership_tier`
 - `Photo` (attachment) → `photo_blob`
 
 **Additional observed fields (policy-dependent usage)**
@@ -122,6 +125,7 @@ NFR-5. Reliability: transient HTTP errors downloading photos should be retried a
 - `member_number` TEXT UNIQUE NOT NULL
 - `first_name` TEXT NOT NULL
 - `email` TEXT NOT NULL
+- `membership_tier` TEXT NOT NULL
 - `photo` BLOB
 - `created_at` TIMESTAMP
 - `updated_at` TIMESTAMP
@@ -137,6 +141,7 @@ Recommended for debuggability (optional):
 - `member_number` (string, stable key)
 - `first_name` (string)
 - `email` (string)
+- `membership_tier` (string)
 - `photo` (binary blob)
 - `updated_at` (timestamp)
 
@@ -172,6 +177,7 @@ Recommended for debuggability (optional):
 - 2026-02-14: CardImaging DB path confirmed for Windows runtime: `C:\data\skylinks\membersdb\members.db`.
 - 2026-02-14: Fallback policy confirmed: if `Photo` is empty and `Old Photo` exists, use `Old Photo` regardless of `Use Last Year Photo`.
 - 2026-02-14: “Last year photo reuse” broader feature explicitly deferred to a future iteration.
+- 2026-02-14: Scope adjusted to include Airtable field `Membership Tier` mapped to SQLite `membership_tier` based on updated CSV contract.
 
 ---
 

@@ -11,6 +11,7 @@ class MemberRow:
     member_number: str
     first_name: str
     email: str
+    membership_tier: str
     photo: bytes
     airtable_record_id: str
 
@@ -49,14 +50,16 @@ def sync_members(database_path: str, members: list[MemberRow], allow_empty_prune
                     member_number,
                     first_name,
                     email,
+                    membership_tier,
                     photo,
                     airtable_record_id,
                     created_at,
                     updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(member_number) DO UPDATE SET
                     first_name = excluded.first_name,
                     email = excluded.email,
+                    membership_tier = excluded.membership_tier,
                     photo = excluded.photo,
                     airtable_record_id = excluded.airtable_record_id,
                     updated_at = excluded.updated_at
@@ -65,6 +68,7 @@ def sync_members(database_path: str, members: list[MemberRow], allow_empty_prune
                     member.member_number,
                     member.first_name,
                     member.email,
+                    member.membership_tier,
                     member.photo,
                     member.airtable_record_id,
                     now_utc,
@@ -90,6 +94,7 @@ def _ensure_schema(connection: sqlite3.Connection) -> None:
             member_number TEXT UNIQUE NOT NULL,
             first_name TEXT NOT NULL,
             email TEXT NOT NULL,
+            membership_tier TEXT NOT NULL DEFAULT '',
             photo BLOB,
             airtable_record_id TEXT UNIQUE,
             created_at TEXT NOT NULL,
@@ -97,6 +102,7 @@ def _ensure_schema(connection: sqlite3.Connection) -> None:
         )
         """
     )
+    _ensure_membership_tier_column(connection)
 
 
 def _prune_members(
@@ -119,6 +125,16 @@ def _prune_members(
 
 def _now_utc() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _ensure_membership_tier_column(connection: sqlite3.Connection) -> None:
+    columns = connection.execute("PRAGMA table_info(members)").fetchall()
+    has_membership_tier = any(column[1] == "membership_tier" for column in columns)
+    if has_membership_tier:
+        return
+    connection.execute(
+        "ALTER TABLE members ADD COLUMN membership_tier TEXT NOT NULL DEFAULT ''"
+    )
 
 
 def _ensure_parent_dir(database_path: str) -> None:

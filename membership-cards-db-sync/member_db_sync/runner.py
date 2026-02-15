@@ -46,12 +46,16 @@ def run_sync(config: AppConfig, confirm_empty: bool) -> int:
             fields = record.get("fields") if isinstance(record.get("fields"), dict) else {}
             member_number = _normalize_log_value((fields.get("Member Number") if isinstance(fields, dict) else ""))
             email = _normalize_log_value((fields.get("Email") if isinstance(fields, dict) else ""))
+            membership_tier = _normalize_log_value(
+                (fields.get("Membership Tier") if isinstance(fields, dict) else "")
+            )
             logging.warning(
-                "record_skipped reason=%s record_id=%s member_number=%s email=%s",
+                "record_skipped reason=%s record_id=%s member_number=%s email=%s membership_tier=%s",
                 reason,
                 record.get("id", "unknown_record_id"),
                 member_number or "-",
                 email or "-",
+                membership_tier or "-",
             )
             continue
 
@@ -84,6 +88,7 @@ def run_sync(config: AppConfig, confirm_empty: bool) -> int:
                 "member_number": candidate.member_number,
                 "first_name": candidate.first_name,
                 "email": candidate.email,
+                "membership_tier": candidate.membership_tier,
                 "photo": photo_blob,
                 "airtable_record_id": candidate.airtable_record_id,
             }

@@ -4,7 +4,7 @@
 
 This task initializes project management artifacts for the Member Card Print Queue Sync project defined in `.agent-os/project-spec.md`. The objective is to make the project implementation-ready with explicit scope, criteria, ownership, and verification structure.
 
-CSV review completed on 2026-02-14 using `artifacts/airtable_schema.csv` (58 rows, 15 columns). Required fields are present with exact names: `Member Number`, `First Name`, `Email`, `Photo`. Additional relevant fields discovered: `Old Photo` and `Use Last Year Photo`.
+CSV review completed on 2026-02-14 using `artifacts/airtable_schema.csv` (58 rows, 14 columns in latest export). Required fields are present with exact names: `Member Number`, `First Name`, `Email`, `Membership Tier`, `Photo`. Additional relevant fields discovered: `Old Photo` and `Use Last Year Photo`.
 
 ## Goals
 
@@ -65,6 +65,9 @@ CSV review completed on 2026-02-14 using `artifacts/airtable_schema.csv` (58 row
 - Data-quality risk:
   - Fallback behavior is now defined to use `Old Photo` when `Photo` is empty; risk remains if `Old Photo` formatting is invalid.
   - Impact: Invalid old-photo payloads may still cause per-record skips.
+- Schema-change risk:
+  - Adding `membership_tier` to existing SQLite `members` table requires migration-safe logic.
+  - Impact: Existing workstation DBs could fail sync until schema is upgraded.
 
 ## Open Questions
 
@@ -80,3 +83,4 @@ CSV review completed on 2026-02-14 using `artifacts/airtable_schema.csv` (58 row
 | 2026-02-14 | PM Agent | Windows DB path confirmed: `C:\data\skylinks\membersdb\members.db`. | Decided | User-provided runtime contract for production execution. |
 | 2026-02-14 | PM Agent | Fallback policy confirmed: if `Photo` is empty and `Old Photo` exists, use `Old Photo` regardless of `Use Last Year Photo` value. | Decided | User-provided policy closes fallback ambiguity and unblocks implementation. |
 | 2026-02-14 | PM Agent | “Last year photo reuse” broader feature deferred beyond current implementation scope. | Decided | Keeps v1 focused on deterministic queue sync behavior. |
+| 2026-02-14 | PM Agent | Scope adjustment approved: include Airtable `Membership Tier` in extraction and SQLite sync. | Decided | Updated CSV confirms field availability across all rows and operational need. |

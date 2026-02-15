@@ -36,6 +36,9 @@ Validate that the Airtable to SQLite sync behaves correctly and safely for ProSh
 | V-14 | Data contract | Parse attachment string format `filename (url)` | Unit/integration parsing test | URL is extracted correctly for download |
 | V-15 | Fallback policy | `Photo` empty + `Old Photo` present + `Use Last Year Photo=checked` | Fixture row test | Old photo is selected per approved policy |
 | V-16 | Fallback policy | `Photo` empty + `Old Photo` present + flag not checked | Fixture row test | Old photo is selected and logged as fallback |
+| V-17 | FR-3 (tier) | Required `Membership Tier` field present | Integration/fixture run | Candidate payload includes `membership_tier` |
+| V-18 | SQLite contract | `membership_tier` persisted and updated | Integration run + rerun with changed tier | DB row stores tier and reflects updates on rerun |
+| V-19 | Migration safety | Existing DB without tier column | Run against pre-change DB | Script upgrades schema safely and completes sync |
 
 ## Evidence (Results)
 
@@ -57,6 +60,9 @@ Validate that the Airtable to SQLite sync behaves correctly and safely for ProSh
 | V-14 | 2026-02-14 | PM/Engineering Agent | Live + CSV-compatible parser path | Passed | Attachment parsing supports dict/list/direct URL/`filename (url)` string formats |
 | V-15 | 2026-02-14 | PM/Engineering Agent | Sandbox live run (`/tmp/members_live2.db`) | Passed | Old-photo fallback events observed (`old_photo_fallback=9`) |
 | V-16 | 2026-02-14 | PM/Engineering Agent | Sandbox live run (`/tmp/members_live2.db`) | Passed | Fallback applied regardless checkbox state per approved policy and observed runtime behavior |
+| V-17 | 2026-02-14 | PM/Engineering Agent | Sandbox live run (`/tmp/members_live_tier.db`) | Passed | `Membership Tier` extracted as required field; skip logs include tier context |
+| V-18 | 2026-02-14 | PM/Engineering Agent | Sandbox live run (`/tmp/members_live_tier.db`) | Passed | SQLite includes `membership_tier`; persisted values observed (`Pro`/`VIP`) |
+| V-19 | 2026-02-14 | PM/Engineering Agent | Local migration simulation (`/tmp/members_migration_test.db`) | Passed | Old-schema DB upgraded via add-column path and sync completed (`updated=1`) |
 
 ## Known Issues
 
@@ -72,6 +78,7 @@ Validate that the Airtable to SQLite sync behaves correctly and safely for ProSh
   - [x] CardImaging DB absolute path locked: `C:\data\skylinks\membersdb\members.db`.
 - [ ] All high-priority tests passed (V-01, V-05, V-06, V-08, V-09, V-10, V-11).
 - [ ] Attachment parsing and fallback tests passed (V-14, V-15, V-16).
+- [x] Membership-tier tests passed (V-17, V-18, V-19).
 - [ ] Empty-view guard validated with and without `--confirm-empty`.
 - [ ] Logging output reviewed by non-technical operator for readability.
 - [ ] No secrets committed; configuration instructions documented.

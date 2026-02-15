@@ -14,6 +14,7 @@ from .config import AppConfig
 FIELD_MEMBER_NUMBER = "Member Number"
 FIELD_FIRST_NAME = "First Name"
 FIELD_EMAIL = "Email"
+FIELD_MEMBERSHIP_TIER = "Membership Tier"
 FIELD_PHOTO = "Photo"
 FIELD_OLD_PHOTO = "Old Photo"
 
@@ -26,6 +27,7 @@ class MemberCandidate:
     member_number: str
     first_name: str
     email: str
+    membership_tier: str
     photo_url: str
     used_old_photo_fallback: bool
 
@@ -61,6 +63,7 @@ def build_member_candidate(record: dict[str, Any]) -> tuple[MemberCandidate | No
     member_number = _clean_str(fields.get(FIELD_MEMBER_NUMBER))
     first_name = _clean_str(fields.get(FIELD_FIRST_NAME))
     email = _clean_str(fields.get(FIELD_EMAIL))
+    membership_tier = _clean_str(fields.get(FIELD_MEMBERSHIP_TIER))
 
     if not member_number:
         return None, "missing_member_number"
@@ -68,6 +71,8 @@ def build_member_candidate(record: dict[str, Any]) -> tuple[MemberCandidate | No
         return None, "missing_first_name"
     if not email:
         return None, "missing_email"
+    if not membership_tier:
+        return None, "missing_membership_tier"
 
     primary_photo_url = _extract_attachment_url(fields.get(FIELD_PHOTO))
     old_photo_url = _extract_attachment_url(fields.get(FIELD_OLD_PHOTO))
@@ -82,6 +87,7 @@ def build_member_candidate(record: dict[str, Any]) -> tuple[MemberCandidate | No
         member_number=member_number,
         first_name=first_name,
         email=email,
+        membership_tier=membership_tier,
         photo_url=photo_url,
         used_old_photo_fallback=used_old_photo_fallback,
     )
