@@ -1,2 +1,0 @@
-"""Member DB sync package."""
-
