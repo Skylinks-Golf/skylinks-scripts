@@ -55,7 +55,8 @@ Without a Flipper, open an **elevated** PowerShell (right-click > Run as
 administrator) and run:
 
 ```powershell
-iex (irm https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/main/src/local/new_pc_scripts/bootstrap.ps1)
+$env:SKYLINKS_SETUP_REF = 'device-setup-v1'
+iex (irm https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/device-setup-v1/src/local/new_pc_scripts/bootstrap.ps1)
 ```
 
 `bootstrap.ps1` creates `%USERPROFILE%\Skylinks-Setup`, downloads `setup.ps1`
@@ -79,11 +80,25 @@ UAC dialog.
 Safe to re-run. winget skips anything already installed; bloatware removal and
 power settings are idempotent. WiFi can be skipped on re-runs.
 
-## Pinning the ref
+## Version pinning
 
-`bootstrap.ps1` fetches from `SKYLINKS_SETUP_REF`, which defaults to `main`.
-Before rollout, cut an immutable tag and use it in both `bootstrap.ps1` and the
-Flipper payload URL, in the same commit.
+The Flipper payload is pinned to the immutable tag **`device-setup-v1`**: it
+fetches the bootstrap from that tag and sets `SKYLINKS_SETUP_REF` to it, so
+`setup.ps1` and `packages.txt` come from the same frozen snapshot. `main` stays the bleeding
+edge for ad-hoc runs.
+
+To cut a new version, tag the reviewed commit and bump the payload:
+
+1. `git tag -a device-setup-v2 -m '...'` and `git push origin device-setup-v2`.
+2. In the Flipper payload, bump both the URL ref and `SKYLINKS_SETUP_REF` to
+   the new tag, then re-push the payload to the device.
+
+For branch or latest testing, override the ref inline:
+
+```powershell
+$env:SKYLINKS_SETUP_REF = 'main'
+iex (irm https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/main/src/local/new_pc_scripts/bootstrap.ps1)
+```
 
 ## Legacy
 

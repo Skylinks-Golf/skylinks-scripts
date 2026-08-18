@@ -13,7 +13,7 @@ REM The elevated window then runs the bootstrap on its own, so there is no
 REM keystroke timing tied to the UAC dialog -- the only manual step is
 REM clicking "Yes".
 REM
-REM Branch testing: replace "main" in the URL below with the branch name.
+REM Pinned to tag "device-setup-v1". Branch testing: change the ref in both the
 
 DELAY 3000
 
@@ -21,7 +21,7 @@ REM Open the Run dialog
 GUI r
 DELAY 1000
 
-STRING powershell -Command "Start-Process powershell -Verb RunAs -ArgumentList '-NoExit','-Command','iex (irm https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/main/src/local/new_win_scripts/bootstrap.ps1)'"
+STRING powershell -Command "Start-Process powershell -Verb RunAs -ArgumentList '-NoExit','-Command','$env:SKYLINKS_SETUP_REF=''device-setup-v1''; iex (irm https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/device-setup-v1/src/local/new_win_scripts/bootstrap.ps1)'"
 DELAY 500
 ENTER
 

@@ -14,7 +14,7 @@ REM  - Watch that Spotlight's top hit is actually Terminal before it
 REM    submits. If not, stop and open Terminal manually, then paste the
 REM    bootstrap line below.
 REM
-REM Branch testing: replace "main" in the URL below with the branch name,
+REM Pinned to tag "device-setup-v1". Branch testing: set SKYLINKS_SETUP_REF and the URL
 REM and prefix the command with SKYLINKS_SETUP_REF=<branch>
 
 DELAY 3000
@@ -28,5 +28,5 @@ ENTER
 DELAY 3000
 
 REM Run the bootstrap. Single line so there is only one point of failure.
-STRING bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/main/src/local/new_mac_scripts/bootstrap.sh)"
+STRING SKYLINKS_SETUP_REF=device-setup-v1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/device-setup-v1/src/local/new_mac_scripts/bootstrap.sh)"
 ENTER
