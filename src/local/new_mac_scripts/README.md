@@ -1,7 +1,7 @@
 # Skylinks Admin MacBook Setup
 
 Boring, stable setup workflow for location-level Skylinks admin/manager
-MacBooks. The macOS counterpart to `../new_pc_scripts/setup_skylinks_pc.ps1`.
+MacBooks. The macOS counterpart to `../new_pc_scripts/` (register POS setup).
 
 ## Philosophy
 
