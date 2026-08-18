@@ -41,7 +41,7 @@ macOS will prompt for the admin password and for app permissions.
 Without a Flipper, open Terminal and run the same line by hand:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/main/src/local/new_mac_scripts/bootstrap.sh)"
+SKYLINKS_SETUP_REF=device-setup-v1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/device-setup-v1/src/local/new_mac_scripts/bootstrap.sh)"
 ```
 
 `bootstrap.sh` creates `~/Skylinks-Setup`, downloads `setup.sh` and `Brewfile`
@@ -96,23 +96,24 @@ cd ~/Skylinks-Setup
 ./setup.sh
 ```
 
-## Pinning the ref
+## Version pinning
 
-`bootstrap.sh` fetches `setup.sh` and `Brewfile` from `SKYLINKS_SETUP_REF`,
-which defaults to `main`.
+The Flipper payload is pinned to the immutable tag **`device-setup-v1`**: it
+fetches the bootstrap from that tag and sets `SKYLINKS_SETUP_REF` to it, so
+`setup.sh` and `Brewfile` come from the same frozen snapshot. `main` stays the bleeding
+edge for ad-hoc runs.
 
-This repo is public, so whatever `main` points at is what gets installed on
-admin laptops. Before rolling this out, cut an immutable tag and use it in both
-places in the same commit:
+To cut a new version, tag the reviewed commit and bump the payload:
 
-1. Set `SKYLINKS_SETUP_REF` in `bootstrap.sh` to the tag.
-2. Update the URL in the Flipper payload to the same tag.
+1. `git tag -a device-setup-v2 -m '...'` and `git push origin device-setup-v2`.
+2. In the Flipper payload, bump both the URL ref and `SKYLINKS_SETUP_REF` to
+   the new tag, then re-push the payload to the device.
 
-For branch testing, override it inline instead of editing files:
+For branch or latest testing, override the ref inline:
 
 ```bash
-SKYLINKS_SETUP_REF=feature/skylinks-admin-macbook-setup \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/feature/skylinks-admin-macbook-setup/src/local/new_mac_scripts/bootstrap.sh)"
+SKYLINKS_SETUP_REF=main \
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/main/src/local/new_mac_scripts/bootstrap.sh)"
 ```
 
 ## Files
