@@ -1,0 +1,62 @@
+# Brewfile — Skylinks Mac Server
+# Purpose: Ian's always-on Mac mini. Apple-only services (Reminders sync,
+# Apple Developer / Xcode), cron jobs and Claude agents.
+#
+# Unlike the admin MacBook Brewfile, this one is for a developer-run server,
+# so dev tooling and quality-of-life tools are in scope.
+
+cask_args appdir: "/Applications"
+
+tap "keith/formulae"
+
+# Shell
+brew "starship"
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+brew "zsh-completions"
+brew "bash"
+brew "bash-completion@2"
+
+# Modern basics
+brew "ripgrep"
+brew "fd"
+brew "fzf"
+brew "bat"
+brew "eza"
+brew "zoxide"
+brew "jq"
+brew "yq"
+brew "tree"
+brew "htop"
+brew "wget"
+brew "tmux"
+
+# GNU tools, so commands behave like Linux. Put first in PATH by the dotfiles.
+brew "coreutils"
+brew "gnu-sed"
+brew "grep"
+brew "findutils"
+brew "gawk"
+brew "gnu-tar"
+
+# Dev stack
+brew "git"
+brew "gh"
+brew "node"
+brew "uv"
+brew "shellcheck"
+cask "gcloud-cli"
+cask "visual-studio-code"
+cask "iterm2"
+cask "google-chrome"
+
+# Apple server tools
+# Formula (not the tailscale-app cask) so tailscaled can run as a system
+# daemon and connect before anyone logs in.
+brew "tailscale"
+brew "keith/formulae/reminders-cli"
+brew "mas"
+
+# Mac App Store. Needs an App Store sign-in first; fails softly without one.
+# Xcode is a ~40 GB download.
+mas "Xcode", id: 497799835

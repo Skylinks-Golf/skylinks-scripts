@@ -1,0 +1,79 @@
+# Interactive zsh — Skylinks Mac server
+#
+# Machine-specific or private settings go in ~/.zshrc.local (not tracked).
+
+_dotfiles="${${(%):-%x}:A:h:h}"
+
+typeset -U path PATH
+
+# History: big, shared between tabs, no duplicates.
+# Start a command with a space to keep it out of history.
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+setopt EXTENDED_HISTORY SHARE_HISTORY HIST_IGNORE_ALL_DUPS HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS HIST_VERIFY
+
+setopt AUTO_CD AUTO_PUSHD PUSHD_IGNORE_DUPS PUSHD_SILENT
+setopt INTERACTIVE_COMMENTS NO_BEEP
+
+# Completion
+if [[ -n "$HOMEBREW_PREFIX" ]]; then
+  fpath=("$HOMEBREW_PREFIX/share/zsh-completions" "$HOMEBREW_PREFIX/share/zsh/site-functions" $fpath)
+fi
+_zcache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+[[ -d "$_zcache" ]] || mkdir -p "$_zcache"
+zmodload zsh/complist
+autoload -Uz compinit
+compinit -d "$_zcache/zcompdump"
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*'
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "$_zcache/compcache"
+zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
+
+# Keys: emacs-style editing; up/down search history for what's already typed.
+# The extra bindings make Home/End/Delete/Ctrl+arrows work from Windows
+# Terminal over SSH.
+bindkey -e
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
+bindkey '^[OA' up-line-or-beginning-search
+bindkey '^[OB' down-line-or-beginning-search
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
+bindkey '^[[3~' delete-char
+bindkey '^[[1;5C' forward-word
+bindkey '^[[1;5D' backward-word
+
+source "$_dotfiles/shell/aliases.sh"
+
+# Tools: fzf (Ctrl+R history, Ctrl+T files), zoxide (z <dir>), Starship prompt
+if (( $+commands[fzf] )); then
+  source <(fzf --zsh)
+fi
+if (( $+commands[zoxide] )); then
+  eval "$(zoxide init zsh)"
+fi
+if (( $+commands[starship] )); then
+  eval "$(starship init zsh)"
+fi
+
+# Plugins. Syntax highlighting must load last.
+if [[ -n "$HOMEBREW_PREFIX" ]]; then
+  if [[ -r "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+  fi
+  if [[ -r "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+    source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+  fi
+fi
+
+if [[ -r "$HOME/.zshrc.local" ]]; then
+  source "$HOME/.zshrc.local"
+fi
+
+unset _dotfiles _zcache

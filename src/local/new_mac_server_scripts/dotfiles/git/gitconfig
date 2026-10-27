@@ -1,0 +1,24 @@
+# Shared git defaults — Skylinks Mac server
+#
+# Name, email and anything private go in ~/.gitconfig.local, included at the
+# bottom so it wins over these.
+
+[init]
+	defaultBranch = main
+[pull]
+	ff = only
+[push]
+	autoSetupRemote = true
+[fetch]
+	prune = true
+[rerere]
+	enabled = true
+[diff]
+	colorMoved = default
+[alias]
+	st = status -sb
+	lg = log --oneline --graph --decorate -20
+	co = switch
+
+[include]
+	path = ~/.gitconfig.local

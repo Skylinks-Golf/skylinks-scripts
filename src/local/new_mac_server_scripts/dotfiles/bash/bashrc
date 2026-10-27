@@ -1,0 +1,45 @@
+# Interactive bash — Skylinks Mac server
+#
+# Works in macOS's stock bash 3.2 and Homebrew's bash 5. Machine-specific or
+# private settings go in ~/.bashrc.local (not tracked).
+
+case $- in
+  *i*) ;;
+  *) return ;;
+esac
+
+_dotfiles="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")/.." && pwd)"
+
+HISTSIZE=100000
+HISTFILESIZE=100000
+HISTCONTROL=ignoreboth:erasedups
+shopt -s histappend checkwinsize cdspell
+
+# macOS nags about zsh every time stock bash starts.
+export BASH_SILENCE_DEPRECATION_WARNING=1
+
+. "$_dotfiles/shell/aliases.sh"
+
+# Completion and fzf key bindings need bash 4+ (Homebrew's bash).
+if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
+  shopt -s autocd globstar
+  if [ -r "${HOMEBREW_PREFIX:-}/etc/profile.d/bash_completion.sh" ]; then
+    . "$HOMEBREW_PREFIX/etc/profile.d/bash_completion.sh"
+  fi
+  if command -v fzf >/dev/null 2>&1; then
+    eval "$(fzf --bash)"
+  fi
+fi
+
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init bash)"
+fi
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init bash)"
+fi
+
+if [ -r "$HOME/.bashrc.local" ]; then
+  . "$HOME/.bashrc.local"
+fi
+
+unset _dotfiles

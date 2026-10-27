@@ -1,0 +1,8 @@
+# Login bash. zsh is the default shell; bash is here for scripts and habit.
+_dotfiles="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}" || echo "${BASH_SOURCE[0]}")")/.." && pwd)"
+. "$_dotfiles/shell/env.sh"
+unset _dotfiles
+
+if [ -r "$HOME/.bashrc" ]; then
+  . "$HOME/.bashrc"
+fi

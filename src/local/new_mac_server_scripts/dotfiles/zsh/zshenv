@@ -1,0 +1,7 @@
+# Read by every zsh, including non-interactive ones like `ssh europa brew list`,
+# which read nothing else. Login shells load the environment from .zprofile
+# instead: macOS's /etc/zprofile (path_helper) runs after this file and would
+# reorder PATH.
+if [[ ! -o login ]]; then
+  source "${${(%):-%x}:A:h:h}/shell/env.sh"
+fi

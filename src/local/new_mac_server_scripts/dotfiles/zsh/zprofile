@@ -1,0 +1,2 @@
+# Login zsh (Terminal, iTerm, SSH). Runs after macOS's /etc/zprofile.
+source "${${(%):-%x}:A:h:h}/shell/env.sh"

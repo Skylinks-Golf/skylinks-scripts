@@ -1,0 +1,60 @@
+# Starship prompt — Skylinks Mac server
+# Docs: https://starship.rs/config/
+#
+# Plain-text symbols only, so it renders in Windows Terminal over SSH without
+# a Nerd Font.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = false
+
+format = """
+$username$hostname $directory$git_branch$git_status$python$nodejs$cmd_duration$jobs
+$character"""
+
+# user@host always shows, since this is a machine you SSH into.
+[username]
+show_always = true
+format = "[$user]($style)"
+style_user = "bold green"
+style_root = "bold red"
+
+[hostname]
+ssh_only = false
+format = "[@$hostname]($style)"
+style = "bold green"
+
+[directory]
+truncation_length = 4
+truncate_to_repo = false
+style = "bold cyan"
+
+[git_branch]
+symbol = ""
+format = "on [$branch]($style) "
+
+[git_status]
+format = '([\[$all_status$ahead_behind\]]($style) )'
+
+[python]
+symbol = "py "
+format = '[$symbol$version( \($virtualenv\))]($style) '
+
+[nodejs]
+symbol = "node "
+format = "[$symbol$version]($style) "
+
+[cmd_duration]
+min_time = 2000
+format = "took [$duration]($style) "
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+
+# Keep account names out of the prompt (and out of screenshots).
+[gcloud]
+disabled = true
+
+[aws]
+disabled = true
