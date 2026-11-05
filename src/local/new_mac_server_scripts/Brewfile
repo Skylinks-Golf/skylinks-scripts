@@ -1,13 +1,12 @@
-# Brewfile — Skylinks Mac Server
-# Purpose: Ian's always-on Mac mini. Apple-only services (Reminders sync,
-# Apple Developer / Xcode), cron jobs and Claude agents.
+# Brewfile — Skylinks Mac Server (common to every role)
+# Purpose: always-on Skylinks Mac minis that run scheduled jobs and Claude agents.
+# Role extras live next to this file: Brewfile.apple (dev role: Reminders sync,
+# Xcode) and Brewfile.brain (brain role: database tools, 1Password CLI).
 #
 # Unlike the admin MacBook Brewfile, this one is for a developer-run server,
 # so dev tooling and quality-of-life tools are in scope.
 
 cask_args appdir: "/Applications"
-
-tap "keith/formulae"
 
 # Shell
 brew "starship"
@@ -50,13 +49,7 @@ cask "visual-studio-code"
 cask "iterm2"
 cask "google-chrome"
 
-# Apple server tools
+# Remote access
 # Formula (not the tailscale-app cask) so tailscaled can run as a system
 # daemon and connect before anyone logs in.
 brew "tailscale"
-brew "keith/formulae/reminders-cli"
-brew "mas"
-
-# Mac App Store. Needs an App Store sign-in first; fails softly without one.
-# Xcode is a ~40 GB download.
-mas "Xcode", id: 497799835

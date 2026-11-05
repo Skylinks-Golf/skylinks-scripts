@@ -1,0 +1,12 @@
+# Brewfile.apple — dev role extras (Ian's Apple-services server, Europa)
+# Apple-only work: Reminders sync and Apple Developer / Xcode.
+# Installed by setup.sh after the common Brewfile when --role is dev (default).
+
+tap "keith/formulae"
+
+brew "keith/formulae/reminders-cli"
+brew "mas"
+
+# Mac App Store. Needs an App Store sign-in first; fails softly without one.
+# Xcode is a ~40 GB download.
+mas "Xcode", id: 497799835

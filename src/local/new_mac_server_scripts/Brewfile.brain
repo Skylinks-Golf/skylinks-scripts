@@ -1,0 +1,11 @@
+# Brewfile.brain — brain role extras (per-location data server, e.g. buchanan-brain)
+# The central database and the tools the scheduled pulls need.
+# Installed by setup.sh after the common Brewfile when --role brain.
+#
+# No Apple-only tools here: no Reminders sync, no Xcode, no App Store sign-in.
+
+# Database: Homebrew's SQLite is newer than the one macOS ships.
+brew "sqlite"
+
+# Claude admin logins live in 1Password; the pulls read them with `op`.
+cask "1password-cli"

@@ -24,12 +24,31 @@ For branch testing, set the ref:
 SKYLINKS_SETUP_REF=feature/mac-server-setup bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/feature/mac-server-setup/src/local/new_mac_server_scripts/bootstrap.sh)" bootstrap
 ```
 
+## Roles
+
+| Role | For | Extras |
+| --- | --- | --- |
+| `dev` (default) | Ian's Apple-services server (Europa) | `Brewfile.apple`: Reminders sync, Xcode |
+| `brain` | A per-location data server, one per course | `Brewfile.brain`: SQLite, 1Password CLI; `~/skylinks/` layout |
+
+Brain server for Buchanan Fields:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skylinks-Golf/skylinks-scripts/main/src/local/new_mac_server_scripts/bootstrap.sh)" bootstrap --role brain --site buchanan
+```
+
+The hostname defaults to `<site>-brain` (here `buchanan-brain`), so every
+location is easy to find on the tailnet. A new course is the same command with
+a different `--site`. Brain servers skip the Apple-only steps and use
+`post-install-checklist-brain.md`.
+
 ## What setup.sh does
 
 1. Checks the network and asks for the admin password once.
 2. Installs Homebrew (which also installs the Xcode Command Line Tools).
 3. Clones this repo to `~/data/skylinks/skylinks-scripts` over HTTPS.
-4. Installs everything in the `Brewfile`. One failed package doesn't stop the run.
+4. Installs everything in the `Brewfile`, then the role's own Brewfile. One
+   failed package doesn't stop the run.
 5. Installs Claude Code with its native installer, so it updates itself.
 6. Symlinks the dotfiles from the clone into `~`. Existing files move to
    `~/.dotfiles-backup/<timestamp>/`, never deleted.
@@ -47,6 +66,8 @@ Everything is logged to `~/Skylinks-Setup/server-setup-<timestamp>.log`.
 | Option | What it does |
 | --- | --- |
 | `--hostname NAME` | Sets ComputerName, HostName and LocalHostName |
+| `--role dev\|brain` | Picks the role (default `dev`) |
+| `--site NAME` | Location name, lowercase. Required for `brain` |
 | `--dotfiles-only` | Only links the dotfiles. No sudo, safe on any Mac |
 | `--dry-run` | Prints every change instead of making it |
 
@@ -84,6 +105,9 @@ Handy commands: `ll`, `lt` (tree), `z <dir>`, Ctrl+R (fzf history), `ips`,
 | --- | --- |
 | `bootstrap.sh` | One-line entry point; downloads the repo and runs setup |
 | `setup.sh` | Installer |
-| `Brewfile` | Packages and apps |
+| `Brewfile` | Packages and apps common to every role |
+| `Brewfile.apple` | Dev role extras (Reminders sync, Xcode) |
+| `Brewfile.brain` | Brain role extras (SQLite, 1Password CLI) |
 | `dotfiles/` | Shell, prompt and git config |
-| `post-install-checklist.md` | Manual steps after setup |
+| `post-install-checklist.md` | Manual steps after setup (dev role) |
+| `post-install-checklist-brain.md` | Manual steps after setup (brain role) |

@@ -2,16 +2,21 @@
 #
 # Skylinks Mac Server Setup
 #
-# Turns a freshly installed Mac into Ian's always-on work server: Homebrew and
-# the Brewfile, shell dotfiles, Claude Code, and server power/remote settings.
+# Turns a freshly installed Mac into an always-on Skylinks server: Homebrew and
+# the Brewfiles, shell dotfiles, Claude Code, and server power/remote settings.
 # Run it at the machine (or over Screen Sharing): it prompts for the admin
 # password and some steps trigger macOS permission dialogs.
+#
+# Two roles. "dev" (the default) is Ian's Apple-services server, Europa. "brain"
+# is a per-location data server that runs the scheduled pulls into one database.
 #
 # Safe to re-run. Every step checks before it changes anything.
 #
 # Usage:
-#   ./setup.sh                    full setup
+#   ./setup.sh                    full setup (dev role)
 #   ./setup.sh --hostname europa  also set the computer name
+#   ./setup.sh --role brain --site buchanan
+#                                 brain server; hostname defaults to buchanan-brain
 #   ./setup.sh --dotfiles-only    only link the shell dotfiles (no sudo)
 #   ./setup.sh --dry-run          print what would happen, change nothing
 #
@@ -33,11 +38,29 @@ JOB_LOG_DIR="$HOME/Library/Logs/skylinks"
 DRY_RUN=0
 DOTFILES_ONLY=0
 NEW_HOSTNAME=""
+ROLE="dev"
+SITE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run)       DRY_RUN=1 ;;
     --dotfiles-only) DOTFILES_ONLY=1 ;;
+    --role)
+      ROLE="${2:-}"
+      if [[ "$ROLE" != "dev" && "$ROLE" != "brain" ]]; then
+        echo "ERROR: --role must be dev or brain"
+        exit 1
+      fi
+      shift
+      ;;
+    --site)
+      SITE="${2:-}"
+      if [[ ! "$SITE" =~ ^[a-z][a-z0-9-]*$ ]]; then
+        echo "ERROR: --site needs a lowercase name, e.g. --site buchanan"
+        exit 1
+      fi
+      shift
+      ;;
     --hostname)
       NEW_HOSTNAME="${2:-}"
       if [[ -z "$NEW_HOSTNAME" ]]; then
@@ -47,7 +70,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -h|--help)
-      sed -n '3,19p' "$0" | sed 's/^# \{0,1\}//'
+      sed -n '3,24p' "$0" | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     *)
@@ -57,6 +80,15 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+if [[ "$ROLE" == "brain" ]]; then
+  if [[ -z "$SITE" ]]; then
+    echo "ERROR: --role brain needs --site, e.g. --site buchanan"
+    exit 1
+  fi
+  # One naming pattern per location, so every brain is easy to find on the tailnet.
+  [[ -z "$NEW_HOSTNAME" ]] && NEW_HOSTNAME="$SITE-brain"
+fi
 
 mkdir -p "$SETUP_DIR"
 LOG="$SETUP_DIR/server-setup-$(date +%Y%m%d-%H%M%S).log"
@@ -153,6 +185,7 @@ echo "======================================"
 echo " Skylinks Mac Server Setup"
 echo "======================================"
 echo
+echo "Role:        $ROLE${SITE:+ (site: $SITE)}"
 echo "Source ref:  $SKYLINKS_SETUP_REF"
 echo "Repo clone:  $REPO_DIR"
 echo "Log file:    $LOG"
@@ -256,17 +289,26 @@ BREWFILE="$SCRIPT_DIR/Brewfile"
 
 section "Packages (Brewfile)"
 
-if [[ "$DRY_RUN" -eq 1 ]]; then
-  echo "DRY-RUN: brew bundle --file=$BREWFILE"
-  grep -E '^(brew|cask|mas|tap) ' "$BREWFILE" | sed 's/^/  /'
-elif brew bundle --file="$BREWFILE"; then
-  echo
-  echo "All packages installed."
-else
-  # Never let one failed package abort the run. A missing App Store sign-in
-  # makes the Xcode line fail, which is expected on a first run.
-  warn "one or more packages failed to install. Details are in the log."
-fi
+# The common Brewfile for every role, then the role's own extras: Apple-only
+# tools (Reminders, Xcode) for dev, the database and 1Password CLI for brain.
+case "$ROLE" in
+  brain) ROLE_BREWFILE="$SCRIPT_DIR/Brewfile.brain" ;;
+  *)     ROLE_BREWFILE="$SCRIPT_DIR/Brewfile.apple" ;;
+esac
+
+for BF in "$BREWFILE" "$ROLE_BREWFILE"; do
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    echo "DRY-RUN: brew bundle --file=$BF"
+    grep -E '^(brew|cask|mas|tap) ' "$BF" | sed 's/^/  /'
+  elif brew bundle --file="$BF"; then
+    echo
+    echo "Installed: $(basename "$BF")"
+  else
+    # Never let one failed package abort the run. A missing App Store sign-in
+    # makes the Xcode line fail, which is expected on a first dev-role run.
+    warn "one or more packages in $(basename "$BF") failed to install. Details are in the log."
+  fi
+done
 
 # ---------------------------------------------------------------------------
 # Claude Code
@@ -288,6 +330,37 @@ fi
 link_dotfiles
 
 run mkdir -p "$JOB_LOG_DIR"
+
+# ---------------------------------------------------------------------------
+# Brain server layout
+#
+# A fixed folder layout and a small site.env, so the pull scripts, backups and
+# alerts all find the same paths and know which location they run for.
+# ---------------------------------------------------------------------------
+
+if [[ "$ROLE" == "brain" ]]; then
+  section "Brain server layout"
+
+  SKYLINKS_HOME="$HOME/skylinks"
+  SITE_ENV="$SKYLINKS_HOME/site.env"
+
+  run mkdir -p "$SKYLINKS_HOME/data" "$SKYLINKS_HOME/backups"
+
+  if [[ -f "$SITE_ENV" ]]; then
+    echo "[ OK    ] $SITE_ENV already exists (left alone)."
+  elif [[ "$DRY_RUN" -eq 1 ]]; then
+    echo "DRY-RUN: write $SITE_ENV (SKYLINKS_SITE=$SITE)"
+  else
+    printf '%s\n' \
+      "# Written by new_mac_server_scripts/setup.sh. Safe to edit; setup never overwrites it." \
+      "SKYLINKS_SITE=$SITE" \
+      "SKYLINKS_ROLE=brain" \
+      "SKYLINKS_DATA_DIR=$SKYLINKS_HOME/data" \
+      "SKYLINKS_BACKUP_DIR=$SKYLINKS_HOME/backups" \
+      "SKYLINKS_LOG_DIR=$JOB_LOG_DIR" > "$SITE_ENV"
+    echo "[ WROTE ] $SITE_ENV"
+  fi
+fi
 
 # ---------------------------------------------------------------------------
 # Server settings
@@ -390,16 +463,27 @@ echo "[ INFO  ] Computer name: $(scutil --get ComputerName 2>/dev/null || echo u
 
 section "$( [[ "$WARNINGS" -gt 0 ]] && echo "Setup finished with $WARNINGS warning(s)" || echo "Setup complete" )"
 
-echo "Manual next steps (see post-install-checklist.md):"
+if [[ "$ROLE" == "brain" ]]; then
+  echo "Manual next steps (see post-install-checklist-brain.md):"
+else
+  echo "Manual next steps (see post-install-checklist.md):"
+fi
 echo
 echo "1. sudo tailscale up            # sign this Mac into the tailnet"
 echo "2. Turn on Screen Sharing:      System Settings > General > Sharing"
 echo "3. Turn on auto-login (see Status above)."
-echo "4. Sign in to iCloud with Reminders on."
-echo "5. Sign in to the App Store, then re-run to install Xcode."
-echo "6. claude                       # sign in to Claude Code"
-echo "7. gh auth login && gcloud auth login"
-echo "8. Open a new terminal tab to load the new shell config."
+if [[ "$ROLE" == "brain" ]]; then
+  echo "4. op account add               # 1Password CLI, for the Claude admin logins"
+  echo "5. claude                       # sign in to Claude Code"
+  echo "6. gh auth login && gcloud auth login"
+  echo "7. Open a new terminal tab to load the new shell config."
+else
+  echo "4. Sign in to iCloud with Reminders on."
+  echo "5. Sign in to the App Store, then re-run to install Xcode."
+  echo "6. claude                       # sign in to Claude Code"
+  echo "7. gh auth login && gcloud auth login"
+  echo "8. Open a new terminal tab to load the new shell config."
+fi
 echo
 echo "Logs: $LOG"
 
